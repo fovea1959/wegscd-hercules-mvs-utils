@@ -142,7 +142,7 @@ def main(argv):
     c = HerculesCommander(args.url)
     for new_line in tail_follow(args.mvs_logs_dir):
         new_line = new_line.rstrip()
-        print(new_line)
+        logging.info("%s", new_line)
         m = compile_regex(r'^.*(?:IEC502E|IEF234E) (?:K|D|RK|RD|R) (?P<cuu>[0-9A-F]{3,4}),.*$').match(new_line)
         if m:
             cuu = m.group("cuu")
@@ -168,15 +168,15 @@ def main(argv):
                 for g in (f"{volser}*.aws", f"{volser}*.het"):
                     xx = list(args.tape_dir.glob(g, case_sensitive=False))
                     for x in xx:
-                        print(x)
+                        logging.debug("%s found %s", g, x)
                         candidates.append(x)
                 tapefile = None
                 if len(candidates) == 1:
                     tapefile = candidates[0]
                 elif len(candidates) == 0:
-                    logging.info("Cannot find tape '%s'", volser)
+                    logging.warning("Cannot find tape '%s'", volser)
                 else:
-                    logging.info("Too many choices for tape '%s': %s", volser, candidates)
+                    logging.warning("Too many choices for tape '%s': %s", volser, candidates)
             if tapefile is not None:
                 c.command(f"devinit {cuu} {tapefile}")
             continue
