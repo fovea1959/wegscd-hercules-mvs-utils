@@ -21,7 +21,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description="load ld370 .xmit file to MVS")
     parser.add_argument("-j", "--job", help="name of job", default="IEBUPDTE")
     parser.add_argument("-d", "--dsn", help="name of LOADLIB", required=True)
-    parser.add_argument("-o", "--output", type=pathlib.Path, help="output file", required=True)
+    parser.add_argument("-o", "--output", type=pathlib.Path, help="output file")
     parser.add_argument("-x", "--xmit", type=pathlib.Path, help="xmit file", required=True)
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
 
@@ -35,9 +35,12 @@ def main(argv):
 
     logging.info("args: %s", args)
 
-    with open(args.output, 'wb') as f:
+    xmit_basename = args.xmit.stem
+    output_name = args.output or args.xmit.with_suffix(".jcl")
+    logging.info("output to %s", output_name)
+    with open(output_name, 'wb') as f:
         add_lines(f, f"""
-//{args.job.upper():<8} JOB (ACCT),'CREATE MEMBER',CLASS=A,MSGCLASS=X
+//{args.job.upper():<8} JOB (ACCT),'Upload {args.xmit.stem[:8]}',CLASS=A,MSGCLASS=X
 //*-----------------------------------------------------------------*
 //RECV370 EXEC RECV370
 //XMITIN    DD *
